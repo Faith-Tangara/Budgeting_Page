@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>50:30:20 Budgeting Tool</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            color: #333;
+            margin: 0;
+            padding: 0;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 20px auto;
+            padding: 20px;
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        h1, h2, h3 {
+            text-align: center;
+            color: #4CAF50;
+        }
+        .summary {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 20px;
+        }
+        .summary div {
+            background-color: #e7f4e7;
+            padding: 20px;
+            border-radius: 8px;
+            width: 32%;
+            text-align: center;
+        }
+        .budget-section {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 20px;
+        }
+        .budget-container {
+            width: 32%;
+            background-color: #e7f4e7;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        .budget-container h3 {
+            margin-top: 0;
+            color: #333;
+        }
+        .budget-container label {
+            display: block;
+            margin-top: 10px;
+        }
+        .budget-container input {
+            width: calc(100% - 20px);
+            padding: 8px;
+            margin-top: 5px;
+        }
+        .budget-container button {
+            margin-top: 10px;
+            width: 100%;
+            padding: 10px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+        .budget-container button:hover {
+            background-color: #45a049;
+        }
+        .results {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 20px;
+        }
+        table {
+            width: 48%;
+            border-collapse: collapse;
+        }
+        table, th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+        }
+        th {
+            background-color: #4CAF50;
+            color: white;
+        }
+        #bar-chart {
+            width: 48%;
+            height: 400px;
+            background-color: #e7f4e7;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1>50:30:20 Budgeting Tool</h1>
+
+        <!-- Summary Section -->
+        <div class="summary">
+            <div>
+                <h2>Needs (50%)</h2>
+                <p>Rationed: $<span id="needs-rationed">0.00</span></p>
+                <p>Spent: $<span id="needs-amount">0.00</span></p>
+            </div>
+            <div>
+                <h2>Wants (30%)</h2>
+                <p>Rationed: $<span id="wants-rationed">0.00</span></p>
+                <p>Spent: $<span id="wants-amount">0.00</span></p>
+            </div>
+            <div>
+                <h2>Savings (20%)</h2>
+                <p>Rationed: $<span id="savings-rationed">0.00</span></p>
+                <p>Spent: $<span id="savings-amount">0.00</span></p>
+            </div>
+        </div>
+
+        <!-- Input for Income -->
+        <div class="input-section">
+            <h2>Add Income</h2>
+            <label for="income-type">Type of Income:</label>
+            <input type="text" id="income-type" placeholder="E.g., Salary, Freelance">
+            <label for="income-amount">Amount:</label>
+            <input type="number" id="income-amount" placeholder="Enter income amount">
+            <button onclick="addIncome()">Add Income</button>
+        </div>
+
+        <!-- Budget Sections -->
+        <div class="budget-section">
+            <!-- Needs Section -->
+            <div class="budget-container">
+                <h3>Needs</h3>
+                <label for="needs-item">Item:</label>
+                <input type="text" id="needs-item" placeholder="E.g., Rent, Food">
+                <label for="needs-expense">Amount:</label>
+                <input type="number" id="needs-expense" placeholder="Enter amount">
+                <button onclick="addNeedsExpense()">Add Expense</button>
+                <p>Total Needs Expenses: $<span id="total-needs-expenses">0.00</span></p>
+            </div>
+
+            <!-- Wants Section -->
+            <div class="budget-container">
+                <h3>Wants</h3>
+                <label for="wants-item">Item:</label>
+                <input type="text" id="wants-item" placeholder="E.g., Entertainment, Dining Out">
+                <label for="wants-expense">Amount:</label>
+                <input type="number" id="wants-expense" placeholder="Enter amount">
+                <button onclick="addWantsExpense()">Add Expense</button>
+                <p>Total Wants Expenses: $<span id="total-wants-expenses">0.00</span></p>
+            </div>
+
+            <!-- Savings Section -->
+            <div class="budget-container">
+                <h3>Savings/Debt Repayment</h3>
+                <label for="savings-item">Item:</label>
+                <input type="text" id="savings-item" placeholder="E.g., Savings, Loan Repayment">
+                <label for="savings-expense">Amount:</label>
+                <input type="number" id="savings-expense" placeholder="Enter amount">
+                <button onclick="addSavingsExpense()">Add Expense</button>
+                <p>Total Savings/Debt Repayment: $<span id="total-savings-expenses">0.00</span></p>
+            </div>
+        </div>
+
+        <!-- Results Section -->
+        <div class="results">
+            <!-- Expense Table -->
+            <table>
+                <thead>
+                    <tr>
+                        <th>Category</th>
+                        <th>Item</th>
+                        <th>Amount</th>
+                    </tr>
+                </thead>
+                <tbody id="expense-table-body">
+                    <!-- Entries will be added here -->
+                </tbody>
+            </table>
+
+            <!-- Bar Chart Section -->
+            <div id="bar-chart">
+                <canvas id="barCanvas" width="100%" height="100%"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let totalIncome = 0;
+        let totalNeedsExpenses = 0;
+        let totalWantsExpenses = 0;
+        let totalSavingsExpenses = 0;
+
+        function addIncome() {
+            const incomeAmount = parseFloat(document.getElementById('income-amount').value);
+            const incomeType = document.getElementById('income-type').value.trim();
+            if (!isNaN(incomeAmount) && incomeAmount > 0 && incomeType !== '') {
+                totalIncome += incomeAmount;
+                document.getElementById('income-amount').value = ''; // Clear input field
+                document.getElementById('income-type').value = ''; // Clear input field
+                updateSummary();
+                updateChart();
+            }
+        }
+
+        function addNeedsExpense() {
+            const needsExpense = parseFloat(document.getElementById('needs-expense').value);
+            const needsItem = document.getElementById('needs-item').value.trim();
+            if (!isNaN(needsExpense) && needsExpense > 0 && needsItem !== '') {
+                totalNeedsExpenses += needsExpense;
+                document.getElementById('needs-expense').value = ''; // Clear input field
+                document.getElementById('needs-item').value = ''; // Clear input field
+                document.getElementById('total-needs-expenses').innerText = totalNeedsExpenses.toFixed(2);
+                addExpenseToTable('Needs', needsItem, needsExpense);
+                updateSummary();
+                updateChart();
+            }
+        }
+
+        function addWantsExpense() {
+            const wantsExpense = parseFloat(document.getElementById('wants-expense').value);
+            const wantsItem = document.getElementById('wants-item').value.trim();
+            if (!isNaN(wantsExpense) && wantsExpense > 0 && wantsItem !== '') {
+                totalWantsExpenses += wantsExpense;
+                document.getElementById('wants-expense').value = ''; // Clear input field
+                document.getElementById('wants-item').value = ''; // Clear input field
+                document.getElementById('total-wants-expenses').innerText = totalWantsExpenses.toFixed(2);
+                addExpenseToTable('Wants', wantsItem, wantsExpense);
+                updateSummary();
+                updateChart();
+            }
+        }
+
+        function addSavingsExpense() {
+            const savingsExpense = parseFloat(document.getElementById('savings-expense').value);
+            const savingsItem = document.getElementById('savings-item').value.trim();
+            if (!isNaN(savingsExpense) && savingsExpense > 0 && savingsItem !== '') {
+                totalSavingsExpenses += savingsExpense;
+                document.getElementById('savings-expense').value = ''; // Clear input field
+                document.getElementById('savings-item').value = ''; // Clear input field
+                document.getElementById('total-savings-expenses').innerText = totalSavingsExpenses.toFixed(2);
+                addExpenseToTable('Savings', savingsItem, savingsExpense);
+                updateSummary();
+                updateChart();
+            }
+        }
+
+        function updateSummary() {
+            const needsRationed = totalIncome * 0.50;
+            const wantsRationed = totalIncome * 0.30;
+            const savingsRationed = totalIncome * 0.20;
+            
+            document.getElementById('needs-rationed').innerText = needsRationed.toFixed(2);
+            document.getElementById('wants-rationed').innerText = wantsRationed.toFixed(2);
+            document.getElementById('savings-rationed').innerText = savingsRationed.toFixed(2);
+
+            document.getElementById('needs-amount').innerText = totalNeedsExpenses.toFixed(2);
+            document.getElementById('wants-amount').innerText = totalWantsExpenses.toFixed(2);
+            document.getElementById('savings-amount').innerText = totalSavingsExpenses.toFixed(2);
+        }
+
+        function addExpenseToTable(category, item, amount) {
+            const tableBody = document.getElementById('expense-table-body');
+            const row = document.createElement('tr');
+            const categoryCell = document.createElement('td');
+            const itemCell = document.createElement('td');
+            const amountCell = document.createElement('td');
+
+            categoryCell.textContent = category;
+            itemCell.textContent = item;
+            amountCell.textContent = amount.toFixed(2);
+
+            row.appendChild(categoryCell);
+            row.appendChild(itemCell);
+            row.appendChild(amountCell);
+            tableBody.appendChild(row);
+        }
+
+        // Function to draw a stacked bar chart using Canvas API
+        function updateChart() {
+            const canvas = document.getElementById('barCanvas');
+            const ctx = canvas.getContext('2d');
+            const width = canvas.width;
+            const height = canvas.height;
+            const barWidth = width / 3 - 20; // Three bars with some space between
+            const barSpacing = 20;
+            const maxBarHeight = height - 50; // Leave some space for labels
+
+            // Clear previous chart
+            ctx.clearRect(0, 0, width, height);
+
+            // Draw background
+            ctx.fillStyle = '#f4f4f4';
+            ctx.fillRect(0, 0, width, height);
+
+            const categories = [
+                { label: 'Needs', spent: totalNeedsExpenses, rationed: totalIncome * 0.50, colorSpent: '#4CAF50', colorRationed: '#A5D6A7' },
+                { label: 'Wants', spent: totalWantsExpenses, rationed: totalIncome * 0.30, colorSpent: '#FFA726', colorRationed: '#FFCC80' },
+                { label: 'Savings', spent: totalSavingsExpenses, rationed: totalIncome * 0.20, colorSpent: '#29B6F6', colorRationed: '#81D4FA' }
+            ];
+
+            categories.forEach((cat, index) => {
+                let startX = index * (barWidth + barSpacing) + 20;
+                let startY = height - 10;
+
+                // Draw rationed amount
+                ctx.fillStyle = cat.colorRationed;
+                let rationedHeight = (cat.rationed / totalIncome) * maxBarHeight;
+                ctx.fillRect(startX, startY - rationedHeight, barWidth, rationedHeight);
+
+                // Draw spent amount
+                ctx.fillStyle = cat.colorSpent;
+                let spentHeight = (cat.spent / totalIncome) * maxBarHeight;
+                ctx.fillRect(startX, startY - spentHeight, barWidth, spentHeight);
+
+                // Add labels
+                ctx.fillStyle = '#333';
+                ctx.textAlign = 'center';
+                ctx.fillText(cat.label, startX + barWidth / 2, height - 20);
+                ctx.fillText('Rationed', startX + barWidth / 2, height - 35);
+                ctx.fillText('Spent', startX + barWidth / 2, height - 50 - spentHeight);
+            });
+        }
+    </script>
+
+</body>
+</html>
